@@ -1,0 +1,19 @@
+spring:
+    cassandra:
+      keyspace-name: prueba
+      username: oquKJXgBIYhTWjLlgghHoxNZ
+      password: NLR.Tz8NwwJDK,cNOYz.LrFhsNTvEQ936XuzA6_JEDT8LC6lP0F-aq,SIQouTz1mTZkRxt8qowFoqxDbEnUjAQFlEb0zIy8FLgKuduo+ZRc7aZloAZeahBaOn+iWgEPv
+      schema-action: create-if-not-exists
+      request:
+        timeout: 10s
+      connection:
+        connect-timeout: 10s
+        init-query-timeout: 10s
+datastax.astra:
+  secure-connect-bundle: secure-connect-db-prueba.zip
+astra.db:
+  id: AstraCS:oquKJXgBIYhTWjLlgghHoxNZ:7390c646a66478d08b2083f40ef82279a947b9adb416fe81843ca38a3c818bde
+  region: us-east1
+  keyspace: prueba
+  application.token: AstraCS:oquKJXgBIYhTWjLlgghHoxNZ:7390c646a66478d08b2083f40ef82279a947b9adb416fe81843ca38a3c818bde
+

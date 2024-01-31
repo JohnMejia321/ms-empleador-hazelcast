@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Inner consulting</title>
+</head>
+<body>
+  <h1>Formulario inscripción de empleador</h1>
+  <form action="/agregar-empleador" method="post" enctype="multipart/form-data">
+    <p>
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" required>
+    </p>
+    <p>
+      <label for="apellido">Apellido:</label>
+      <input type="text" id="apellido" name="apellido" required>
+    </p>
+    <p>
+      <label for="pdfFile">PDF File:</label>
+      <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf" required>
+    </p>
+    <p>
+      <button type="submit">Enviar</button>
+    </p>
+  </form>
+</body>
+</html>

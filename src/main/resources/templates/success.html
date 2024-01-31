@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro</title>
+</head>
+<body>
+  <h1>Empleador</h1>
+  <p>Empleador guardado con éxito</p>
+  <p>Id: <span th:text="${empleador.id}"></span></p>
+  <p>Nombre: <span th:text="${empleador.nombre}"></span></p>
+  <p>Apellido: <span th:text="${empleador.apellido}"></span></p>
+  <p>PDF Url: <a th:href="${empleador.pdfUrl}" th:text="${empleador.pdfUrl}"></a></p>
+</body>
+</html>
