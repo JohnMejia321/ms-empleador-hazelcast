@@ -157,6 +157,7 @@ public class EmpleadorService {
                     .setName("Map String to JSON Object")
                     .writeTo(Sinks.logger());
 
+
             // Iniciar el Job
             hz.getJet().newJob(pipeline);
 
