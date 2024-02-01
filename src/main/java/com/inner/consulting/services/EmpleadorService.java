@@ -41,6 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.AbstractMap;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -152,11 +153,11 @@ public class EmpleadorService {
                         }
 
                         json.append("}");
-                        return json.toString();
+                        return new AbstractMap.SimpleEntry<>(entry, json.toString());
                     })
                     .setName("Map String to JSON Object")
-                    .writeTo(Sinks.logger());
-
+                   // .writeTo(Sinks.map("jsonMap")) ;// Almacenar en un IMap de Hazelcast
+                   .writeTo(Sinks.logger()); // Mostrar en Sinks.logger()
 
             // Iniciar el Job
             hz.getJet().newJob(pipeline);
@@ -172,8 +173,7 @@ public class EmpleadorService {
             System.err.println("Error al procesar el PDF con Tesseract: " + e.getMessage());
             throw e;
         }
-    }
+    }}
 
-    }
 
 
