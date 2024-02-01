@@ -31,8 +31,7 @@ import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.jet.config.JetConfig;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-
+import com.hazelcast.collection.IList;
 
 import java.io.File;
 import java.io.InputStream;
@@ -42,6 +41,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -87,7 +88,7 @@ public class EmpleadorService {
             Logger.getLogger(EmpleadorService.class.getName()).info("Texto extraído del PDF: " + ocrResult);
 
             // Create a new user object
-            Empleador empleador = new Empleador(empleadorId, nombre, apellido, pdfUrl);
+            Empleador empleador = new Empleador(empleadorId, nombre, apellido, pdfUrl, ocrResult);
 
             // Save the user to Cassandra
             empleadorRepository.save(empleador);
@@ -99,10 +100,6 @@ public class EmpleadorService {
             throw e;
         }
     }
-
-
-
-
 
     private String procesarPDF(InputStream pdfStream) throws Exception {
         try {
@@ -156,8 +153,9 @@ public class EmpleadorService {
                         return new AbstractMap.SimpleEntry<>(entry, json.toString());
                     })
                     .setName("Map String to JSON Object")
-                   // .writeTo(Sinks.map("jsonMap")) ;// Almacenar en un IMap de Hazelcast
-                   .writeTo(Sinks.logger()); // Mostrar en Sinks.logger()
+                    //.writeTo(Sinks.observable("results"));
+                   // .writeTo(Sinks.logger());
+                    .writeTo(Sinks.map("jsonMap")) ;//
 
             // Iniciar el Job
             hz.getJet().newJob(pipeline);
@@ -173,7 +171,5 @@ public class EmpleadorService {
             System.err.println("Error al procesar el PDF con Tesseract: " + e.getMessage());
             throw e;
         }
-    }}
-
-
-
+    }
+}

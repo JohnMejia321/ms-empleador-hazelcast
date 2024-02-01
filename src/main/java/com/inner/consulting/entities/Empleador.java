@@ -17,7 +17,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("inscripcion_empleador")
+@Table("inscripcion_empleador4")
 public class Empleador {
 
     @Id
@@ -35,5 +35,10 @@ public class Empleador {
 
     @Column("ruta_documento")
     private String pdfUrl;
+
+    @Column("metadatos_documento")
+    @CassandraType(type = CassandraType.Name.TEXT)
+    private String metadatosDocumento;
+
 
 }
