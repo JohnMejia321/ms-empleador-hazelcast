@@ -1,5 +1,6 @@
 package com.inner.consulting.services;
 
+import com.hazelcast.jet.kafka.KafkaSinks;
 import com.inner.consulting.repositories.EmpleadorRepository;
 import com.inner.consulting.entities.Empleador;
 
@@ -7,6 +8,7 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import net.sourceforge.tess4j.ITesseract;
 
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,7 @@ import com.hazelcast.jet.pipeline.BatchStage;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.Sinks;
 
+import org.springframework.kafka.core.ProducerFactory;
 
 import java.io.File;
 import java.io.InputStream;
@@ -47,6 +50,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.logging.Logger;
+
+
+
+
 
 @Service
 public class EmpleadorService {
@@ -59,6 +66,9 @@ public class EmpleadorService {
 
     @Autowired
     private ITesseract tesseract;
+
+    @Autowired
+    private ProducerFactory<String, String> producerFactory;
 
     private String minionEndpoint = "http://localhost:9000";
     private String minionBucketName = "my-bucket";
@@ -122,15 +132,14 @@ public class EmpleadorService {
             ocrResult = new String(bytes, Charset.defaultCharset());
 
             // Configuración de Hazelcast IMDG
-            // Configuración de Hazelcast IMDG
             Config config = new Config();
             config.getJetConfig().setEnabled(true);
             HazelcastInstance hz = Hazelcast.newHazelcastInstance(config);
 
-// Creación del Pipeline
+            // Creación del Pipeline
             Pipeline pipeline = Pipeline.create();
 
-// Fuente de datos: Un solo string en formato "clave:valor"
+            // Fuente de datos: Un solo string en formato "clave:valor"
             BatchStage<AbstractMap.SimpleEntry<String, String>> jsonEntries = pipeline.readFrom(Sources.<String>list("sourceList"))
                     .map(entry -> {
                         // Dividir la entrada en clave y valor, teniendo en cuenta el salto de línea
@@ -158,6 +167,17 @@ public class EmpleadorService {
                     .setName("Map String to JSON Object")
                     .setLocalParallelism(1);
 
+           // Map<String, Object> props = producerFactory.getConfigurationProperties();
+
+            Properties props = new Properties();
+            props.setProperty("bootstrap.servers", "localhost:9092");
+            props.setProperty("key.serializer", StringSerializer.class.getCanonicalName());
+            props.setProperty("value.serializer", StringSerializer.class.getCanonicalName());
+
+
+            jsonEntries
+                    .writeTo(KafkaSinks.kafka(props, "topic1"));
+
             jsonEntries.peek()
                     .writeTo(Sinks.observable("results"));
 
@@ -167,12 +187,11 @@ public class EmpleadorService {
             jsonEntries
                     .writeTo(Sinks.map("jsonMap"));
 
-// Iniciar el Job
+            // Iniciar el Job
             hz.getJet().newJob(pipeline);
 
-// Alimentar la fuente con un solo string de ejemplo
+            // Alimentar la fuente con un solo string de ejemplo
             hz.getList("sourceList").add(ocrResult);
-
 
             // Eliminar el archivo temporal
             Files.delete(tempPdfPath);
