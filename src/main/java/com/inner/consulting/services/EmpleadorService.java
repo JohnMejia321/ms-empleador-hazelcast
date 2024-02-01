@@ -33,6 +33,11 @@ import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.collection.IList;
 
+import com.hazelcast.jet.pipeline.BatchStage;
+import com.hazelcast.jet.pipeline.Pipeline;
+import com.hazelcast.jet.pipeline.Sinks;
+
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -40,10 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
@@ -120,15 +122,16 @@ public class EmpleadorService {
             ocrResult = new String(bytes, Charset.defaultCharset());
 
             // Configuración de Hazelcast IMDG
+            // Configuración de Hazelcast IMDG
             Config config = new Config();
             config.getJetConfig().setEnabled(true);
             HazelcastInstance hz = Hazelcast.newHazelcastInstance(config);
 
-            // Creación del Pipeline
+// Creación del Pipeline
             Pipeline pipeline = Pipeline.create();
 
-            // Fuente de datos: Un solo string en formato "clave:valor"
-            pipeline.readFrom(Sources.<String>list("sourceList"))
+// Fuente de datos: Un solo string en formato "clave:valor"
+            BatchStage<AbstractMap.SimpleEntry<String, String>> jsonEntries = pipeline.readFrom(Sources.<String>list("sourceList"))
                     .map(entry -> {
                         // Dividir la entrada en clave y valor, teniendo en cuenta el salto de línea
                         String[] parts = entry.split("\n");
@@ -153,15 +156,23 @@ public class EmpleadorService {
                         return new AbstractMap.SimpleEntry<>(entry, json.toString());
                     })
                     .setName("Map String to JSON Object")
-                    //.writeTo(Sinks.observable("results"));
-                   // .writeTo(Sinks.logger());
-                    .writeTo(Sinks.map("jsonMap")) ;//
+                    .setLocalParallelism(1);
 
-            // Iniciar el Job
+            jsonEntries.peek()
+                    .writeTo(Sinks.observable("results"));
+
+            jsonEntries.peek()
+                    .writeTo(Sinks.logger());
+
+            jsonEntries
+                    .writeTo(Sinks.map("jsonMap"));
+
+// Iniciar el Job
             hz.getJet().newJob(pipeline);
 
-            // Alimentar la fuente con un solo string de ejemplo
+// Alimentar la fuente con un solo string de ejemplo
             hz.getList("sourceList").add(ocrResult);
+
 
             // Eliminar el archivo temporal
             Files.delete(tempPdfPath);
