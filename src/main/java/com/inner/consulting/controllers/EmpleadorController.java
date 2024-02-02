@@ -22,19 +22,11 @@ public class EmpleadorController {
             @RequestParam("pdfFile") MultipartFile pdfFile,
             Model model) {
         try {
-            // Save the user and the pdf file
             Empleador empleador = empleadorService.saveEmpleador(nombre, apellido, pdfFile);
-
-            // Add the user to the model
             model.addAttribute("empleador", empleador);
-
-            // Return the success view
             return "success";
         } catch (Exception e) {
-            // Add the error message to the model
             model.addAttribute("error", e.getMessage());
-
-            // Return the error view
             return "error";
         }
     }
