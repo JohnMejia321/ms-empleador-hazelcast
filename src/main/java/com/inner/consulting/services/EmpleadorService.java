@@ -1,46 +1,23 @@
 package com.inner.consulting.services;
-
-import com.hazelcast.jet.kafka.KafkaSinks;
+import com.inner.consulting.config.KafkaConfig;
 import com.inner.consulting.repositories.EmpleadorRepository;
 import com.inner.consulting.entities.Empleador;
-
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import net.sourceforge.tess4j.ITesseract;
-
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.hazelcast.jet.Jet;
-import com.hazelcast.jet.JetInstance;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.Sinks;
-import com.hazelcast.jet.pipeline.StreamSource;
-import com.hazelcast.jet.pipeline.StreamStage;
+import com.hazelcast.jet.kafka.KafkaSinks;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.jet.pipeline.Pipeline;
-import com.hazelcast.jet.pipeline.Sinks;
 import com.hazelcast.jet.pipeline.Sources;
-import com.hazelcast.jet.Job;
-import com.hazelcast.config.Config;
-import com.hazelcast.config.JoinConfig;
-import com.hazelcast.config.NetworkConfig;
-import com.hazelcast.jet.config.JetConfig;
-import com.hazelcast.config.Config;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.collection.IList;
-
 import com.hazelcast.jet.pipeline.BatchStage;
-import com.hazelcast.jet.pipeline.Pipeline;
-import com.hazelcast.jet.pipeline.Sinks;
-
 import org.springframework.kafka.core.ProducerFactory;
-
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -68,7 +45,7 @@ public class EmpleadorService {
     private ITesseract tesseract;
 
     @Autowired
-    private ProducerFactory<String, String> producerFactory;
+    private KafkaConfig kafkaConfig;
 
     private String minionEndpoint = "http://localhost:9000";
     private String minionBucketName = "my-bucket";
@@ -167,12 +144,12 @@ public class EmpleadorService {
                     .setName("Map String to JSON Object")
                     .setLocalParallelism(1);
 
-           // Map<String, Object> props = producerFactory.getConfigurationProperties();
+            Properties props = kafkaConfig.producerProperties();
 
-            Properties props = new Properties();
-            props.setProperty("bootstrap.servers", "localhost:9092");
-            props.setProperty("key.serializer", StringSerializer.class.getCanonicalName());
-            props.setProperty("value.serializer", StringSerializer.class.getCanonicalName());
+           // Properties props = new Properties();
+           // props.setProperty("bootstrap.servers", "localhost:9092");
+          //  props.setProperty("key.serializer", StringSerializer.class.getCanonicalName());
+          //  props.setProperty("value.serializer", StringSerializer.class.getCanonicalName());
 
 
             jsonEntries
