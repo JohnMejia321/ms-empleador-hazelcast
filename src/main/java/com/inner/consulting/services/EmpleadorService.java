@@ -7,6 +7,7 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import net.sourceforge.tess4j.ITesseract;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.hazelcast.jet.pipeline.Pipeline;
@@ -38,8 +39,11 @@ public class EmpleadorService {
     private ITesseract tesseract;
     @Autowired
     private KafkaConfig kafkaConfig;
-    private String minionEndpoint = "http://localhost:9000";
-    private String minionBucketName = "my-bucket";
+    @Value("${minion.endpoint}")
+    private String minionEndpoint;
+
+    @Value("${minion.bucketName}")
+    private String minionBucketName;
 
     public Empleador saveEmpleador(String nombre, String apellido, MultipartFile pdfFile) throws Exception {
         try {
@@ -62,7 +66,8 @@ public class EmpleadorService {
             empleadorRepository.save(empleador);
             return empleador;
         } catch (Exception e) {
-            System.err.println("Error al procesar y guardar el empleador: " + e.getMessage());
+           // System.err.println("Error al procesar y guardar el empleador: " + e.getMessage());
+            Logger.getLogger("Error al procesar y guardar el empleador: " + e.getMessage());
             throw e;
         }
     }
@@ -130,7 +135,8 @@ public class EmpleadorService {
             Files.delete(tempPdfPath);
             return ocrResult;
         } catch (Exception e) {
-            System.err.println("Error al procesar el PDF con Tesseract: " + e.getMessage());
+           // System.err.println("Error al procesar el PDF con Tesseract: " + e.getMessage());
+                Logger.getLogger("Error al procesar el PDF con Tesseract: " + e.getMessage());
             throw e;
         }
     }
